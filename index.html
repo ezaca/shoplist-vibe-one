@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#2577bf">
+  <meta name="description" content="Aplicativo de lista de compras para supermercados.">
+  <title>Shop Vibes</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header Navbar -->
+    <header class="app-header">
+      <h1 class="app-title">Shop Vibes</h1>
+      <div class="header-actions">
+        <div id="network-status" class="status-badge online">
+          <span class="status-dot"></span> Online
+        </div>
+        <button id="btn-open-modal" class="btn-add-list" aria-label="Nova Lista" title="Nova Lista">+</button>
+      </div>
+    </header>
+
+    <!-- Update Banner -->
+    <div id="update-banner" class="update-banner hidden">
+      <span>Nova atualização disponível!</span>
+      <button id="btn-update" class="btn-update">Atualizar Agora</button>
+    </div>
+
+    <!-- Main Content Shell -->
+    <main id="app-content" class="app-content"></main>
+
+    <!-- Modal Popup for New Shop List -->
+    <div id="modal-new-list" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal-card">
+        <h2 id="modal-title" class="modal-title">Nova Lista de Compras</h2>
+        <form id="form-new-list">
+          <div class="form-group">
+            <label for="input-store-name" class="form-label">Nome do Mercado</label>
+            <input type="text" id="input-store-name" class="form-input" placeholder="Ex: Supermercado Carrefour" required autocomplete="off">
+          </div>
+          <div class="modal-actions">
+            <button type="button" id="btn-cancel-modal" class="btn-secondary">Cancelar</button>
+            <button type="submit" class="btn-primary">Criar Lista</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js" defer></script>
+</body>
+</html>
