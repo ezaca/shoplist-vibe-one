@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10b981" />
+      <stop offset="100%" stop-color="#047857" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#064e3b" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#grad)" />
+  <g filter="url(#shadow)" fill="none" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="28">
+    <!-- Carrinho de Compras -->
+    <path d="M120 140h48l40 180h180l36-130H190" />
+    <circle cx="215" cy="380" r="22" fill="#ffffff" stroke="none" />
+    <circle cx="375" cy="380" r="22" fill="#ffffff" stroke="none" />
+    <!-- Folha / Maçã no carrinho -->
+    <path d="M280 180c0-30 25-50 50-50s45 20 45 45c0 35-45 65-50 70-5-5-45-35-45-65z" fill="#facc15" stroke="none" />
+    <path d="M330 130c0-15 10-25 25-25" stroke="#ffffff" stroke-width="12" />
+  </g>
+</svg>

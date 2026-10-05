@@ -1,0 +1,24 @@
+{
+  "name": "Lista de Compras & Histórico de Preços",
+  "short_name": "Shoplist",
+  "description": "Aplicativo SPA offline para lista de compras e acompanhamento de preços em supermercados.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#10b981",
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "./icons/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icons/favicon.svg",
+      "sizes": "64x64",
+      "type": "image/svg+xml"
+    }
+  ]
+}
