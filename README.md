@@ -1,4 +1,4 @@
-# International Visitors
+# 🌎 International Visitors
 
 This application is a personal project and mainly targeted to Brazil. The language is Brazilian Portuguese. Please, use a translator and make yourself at home.
 
@@ -54,14 +54,21 @@ Shoplist/
 
 Por ser uma aplicação SPA estática e pura (Vanilla JS ES Modules), você pode abri-la diretamente servindo a pasta com qualquer servidor web HTTP:
 
-### Opção 1: Com Python (Já instalado no sistema)
+### Opção 1: Servidor Local
+
+#### Python
 Na pasta do projeto, execute no terminal:
 ```bash
 python -m http.server 8080
 ```
 E acesse no navegador: `http://localhost:8080`
 
-(AI did not tell us, but `npx http-server` also works 😉).
+#### Node
+Na pasta do projeto, execute no terminal:
+```bash
+npx http-server
+```
+E acesse o endereço informado.
 
 ### Opção 2: VS Code Live Server
 Se estiver usando o Visual Studio Code, clique com o botão direito em `index.html` e selecione **"Open with Live Server"**.
