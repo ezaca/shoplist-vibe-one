@@ -2,7 +2,7 @@
 
 This application is a personal project and mainly targeted to Brazil. The language is Brazilian Portuguese. Please, use a translator and make yourself at home.
 
-# Objective
+# 💡 Objective
 
 This section is international, thus I will write it in English (-ish?).
 
