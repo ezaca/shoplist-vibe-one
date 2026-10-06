@@ -8,7 +8,7 @@
   <title>Shop Vibes</title>
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/svg+xml" href="icon.svg">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" onerror="AddLoadError('style.css')">
 </head>
 <body>
   <div class="app-container">
@@ -19,7 +19,12 @@
         <div id="network-status" class="status-badge online">
           <span class="status-dot"></span> Online
         </div>
-        <button id="btn-open-modal" class="btn-add-list" aria-label="Nova Lista" title="Nova Lista">+</button>
+        <button id="btn-open-modal" class="btn-add-list" aria-label="Nova Lista" title="Nova Lista">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </button>
       </div>
     </header>
 
@@ -52,8 +57,34 @@
         </form>
       </div>
     </div>
+    <pre id="displayErrors" style="display: none; background: #f29797; padding: 1em;"></pre>
   </div>
 
-  <script src="app.js" defer></script>
+  <script>
+    let errorsCaught = [];
+    function AddLoadError(s){
+      AddError("Could not load " + s);
+    }
+    function AddError(s){
+      errorsCaught.push(
+        (s && s.message)
+        || (s && s.reason && s.reason.message)
+        || s
+        || "An error occured");
+      while (errorsCaught.length > 3)
+        errorsCaught.shift();
+      displayErrors.innerText += errorsCaught.join("\n");
+      displayErrors.style.display = "block";
+    }
+    window.onerror = AddError;
+    window.onunhandledrejection = AddError;
+    let originalConsoleError = console.error;
+    console.error = function (...args){
+      AddError(args[0]);
+      originalConsoleError(...args);
+    }
+  </script>
+
+  <script src="app.js" defer onerror="AddLoadError('app.js')"></script>
 </body>
 </html>

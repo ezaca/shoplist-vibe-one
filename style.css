@@ -125,28 +125,36 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-shrink: 0;
 }
 
 .btn-add-list {
+  -webkit-appearance: none;
+  appearance: none;
   background-color: #ffffff;
   color: var(--primary-color);
   border: none;
-  width: 30px;
-  height: 30px;
+  outline: none;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
   border-radius: 50%;
-  font-weight: 700;
-  font-size: 1.25rem;
-  line-height: 1;
-  display: flex;
+  padding: 0;
+  margin: 0;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
   transition: background-color 0.2s ease, transform 0.1s ease;
   flex-shrink: 0;
 }
 
 .btn-add-list.hidden {
-  display: none;
+  display: none !important;
 }
 
 .btn-add-list:hover {
@@ -154,7 +162,7 @@ body {
 }
 
 .btn-add-list:active {
-  transform: scale(0.95);
+  transform: scale(0.92);
 }
 
 /* Shop List Layout & Cards */
@@ -209,14 +217,23 @@ body {
 }
 
 .btn-icon {
-  width: 34px;
-  height: 34px;
+  -webkit-appearance: none;
+  appearance: none;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
   border-radius: 6px;
   border: none;
-  display: flex;
+  outline: none;
+  padding: 0;
+  margin: 0;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
   transition: opacity 0.2s ease, transform 0.1s ease;
 }
 
@@ -412,4 +429,3 @@ body {
   padding: 20px;
   text-align: center;
 }
-
