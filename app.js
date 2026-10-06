@@ -399,16 +399,10 @@ class ShopListApp {
         </div>
         <div class="card-actions">
           <button class="btn-icon btn-edit-list" title="Editar lista" aria-label="Editar lista">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-            </svg>
+            <img src="src/img/icons/edit.svg" alt="Editar lista" width="18" height="18">
           </button>
           <button class="btn-icon btn-delete-list" title="Excluir lista" aria-label="Excluir lista">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="3 6 5 6 21 6"></polyline>
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-            </svg>
+            <img src="src/img/icons/trash.svg" alt="Excluir lista" width="18" height="18">
           </button>
         </div>
       `;
@@ -467,10 +461,7 @@ class ShopListApp {
         <div class="detail-header-top">
           <h2 class="detail-title">${this.escapeHtml(list.name)}</h2>
           <button class="btn-icon btn-edit-list" id="btn-edit-detail" title="Editar lista" aria-label="Editar lista">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-            </svg>
+            <img src="src/img/icons/edit.svg" alt="Editar lista" width="18" height="18">
           </button>
         </div>
         <div class="detail-subtitle">Data: ${formattedDate}</div>

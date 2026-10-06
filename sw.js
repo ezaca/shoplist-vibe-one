@@ -1,11 +1,14 @@
-const CACHE_NAME = 'spa-cache-v3';
+const CACHE_NAME = 'spa-cache-v4';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './style.css',
   './app.js',
   './manifest.json',
-  './icon.svg'
+  './icon.svg',
+  './src/img/icons/plus.svg',
+  './src/img/icons/edit.svg',
+  './src/img/icons/trash.svg'
 ];
 
 /**
