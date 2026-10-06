@@ -4,7 +4,7 @@ This application is a personal project and mainly targeted to Brazil. The langua
 
 # 💡 Objective
 
-This section is international, thus I will write it in English (-ish?).
+This section is international, thus I will write it in English (kinda).
 
 This is a vibe code test. I could call myself an experienced developer with at least 4 years of professional experience in Web, and many years more as hobbyst. I am also a Unity developer for 7 years so far (2026).
 
