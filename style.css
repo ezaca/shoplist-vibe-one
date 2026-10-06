@@ -201,22 +201,45 @@ body {
   color: #666666;
 }
 
-.btn-delete-list {
-  background-color: transparent;
-  color: var(--secondary-color);
-  border: 1px solid var(--secondary-color);
-  border-radius: 6px;
-  padding: 6px 10px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease;
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   flex-shrink: 0;
 }
 
-.btn-delete-list:hover {
+.btn-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.1s ease;
+}
+
+.btn-icon:active {
+  transform: scale(0.94);
+}
+
+.btn-delete-list {
   background-color: var(--secondary-color);
   color: var(--secondary-text);
+}
+
+.btn-delete-list:hover {
+  opacity: 0.9;
+}
+
+.btn-edit-list {
+  background-color: #eef2f5;
+  color: var(--primary-color);
+}
+
+.btn-edit-list:hover {
+  background-color: #e0e6ed;
 }
 
 /* Empty State */
@@ -356,6 +379,13 @@ body {
 .detail-header {
   border-bottom: 2px solid #eef2f5;
   padding-bottom: 12px;
+}
+
+.detail-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .detail-title {

@@ -39,11 +39,15 @@
         <form id="form-new-list">
           <div class="form-group">
             <label for="input-store-name" class="form-label">Nome do Mercado</label>
-            <input type="text" id="input-store-name" class="form-input" placeholder="Ex: Supermercado Carrefour" required autocomplete="off">
+            <input type="text" id="input-store-name" class="form-input" placeholder="Nome do supermercado" required autocomplete="off">
+          </div>
+          <div class="form-group">
+            <label for="input-list-date" class="form-label">Data da Lista</label>
+            <input type="date" id="input-list-date" class="form-input" required>
           </div>
           <div class="modal-actions">
             <button type="button" id="btn-cancel-modal" class="btn-secondary">Cancelar</button>
-            <button type="submit" class="btn-primary">Criar Lista</button>
+            <button type="submit" id="btn-submit-modal" class="btn-primary">Salvar</button>
           </div>
         </form>
       </div>

@@ -119,9 +119,21 @@ class ShopListStore {
   }
 
   /**
+   * Helper to get local date as YYYY-MM-DD string without UTC shift.
+   * @param {Date} [date=new Date()]
+   * @returns {string}
+   */
+  getLocalDateString(date = new Date()) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  /**
    * Retrieves all shop lists from localStorage.
    * Initializes empty array if none exists or if data is invalid.
-   * @returns {Array<{id: string, name: string, createdAt: string, items: Array}>}
+   * @returns {Array<{id: string, name: string, date: string, createdAt: string, items: Array}>}
    */
   getAll() {
     try {
@@ -146,21 +158,39 @@ class ShopListStore {
   }
 
   /**
-   * Adds a new shop list with a grocery store name and creation date.
+   * Adds a new shop list with a grocery store name and custom date.
    * @param {string} storeName
+   * @param {string} customDate - YYYY-MM-DD date string
    * @returns {Object} The created shop list object
    */
-  addList(storeName) {
+  addList(storeName, customDate) {
     const lists = this.getAll();
     const newList = {
       id: Date.now().toString(),
       name: storeName.trim(),
+      date: customDate || this.getLocalDateString(),
       createdAt: new Date().toISOString(),
       items: []
     };
     lists.push(newList);
     this.saveAll(lists);
     return newList;
+  }
+
+  /**
+   * Updates an existing shop list name and date.
+   * @param {string} id
+   * @param {string} storeName
+   * @param {string} customDate
+   */
+  updateList(id, storeName, customDate) {
+    const lists = this.getAll();
+    const listIndex = lists.findIndex(list => list.id === id);
+    if (listIndex !== -1) {
+      lists[listIndex].name = storeName.trim();
+      lists[listIndex].date = customDate;
+      this.saveAll(lists);
+    }
   }
 
   /**
@@ -194,12 +224,15 @@ class ShopListApp {
     this.store = store;
     this.appContent = document.getElementById('app-content');
     this.modal = document.getElementById('modal-new-list');
+    this.modalTitle = document.getElementById('modal-title');
     this.form = document.getElementById('form-new-list');
     this.inputStoreName = document.getElementById('input-store-name');
+    this.inputListDate = document.getElementById('input-list-date');
     this.btnOpenModal = document.getElementById('btn-open-modal');
     this.btnCancelModal = document.getElementById('btn-cancel-modal');
 
     this.activeListId = null;
+    this.editingListId = null;
 
     this.init();
   }
@@ -242,12 +275,22 @@ class ShopListApp {
       this.form.addEventListener('submit', (event) => {
         event.preventDefault();
         const name = this.inputStoreName.value;
+        const date = this.inputListDate.value;
+
         if (name && name.trim()) {
-          this.store.addList(name);
-          this.closeModal();
-          if (this.activeListId) {
-            this.renderMainList();
+          if (this.editingListId) {
+            this.store.updateList(this.editingListId, name, date);
+            const updatedId = this.editingListId;
+            this.closeModal();
+
+            if (this.activeListId === updatedId) {
+              this.renderDetailView(updatedId);
+            } else {
+              this.renderMainList();
+            }
           } else {
+            this.store.addList(name, date);
+            this.closeModal();
             this.renderMainList();
           }
         }
@@ -256,21 +299,67 @@ class ShopListApp {
   }
 
   /**
-   * Opens the new list modal popup and focuses the input field.
+   * Opens the list modal popup pre-filled for editing or empty for creation.
+   * @param {Object|null} listToEdit
    */
-  openModal() {
+  openModal(listToEdit = null) {
     if (!this.modal) return;
-    this.inputStoreName.value = '';
+
+    if (listToEdit) {
+      this.editingListId = listToEdit.id;
+      this.modalTitle.textContent = 'Editar Lista de Compras';
+      this.inputStoreName.value = listToEdit.name;
+
+      if (listToEdit.date) {
+        if (listToEdit.date.includes('T')) {
+          this.inputListDate.value = this.store.getLocalDateString(new Date(listToEdit.date));
+        } else {
+          this.inputListDate.value = listToEdit.date;
+        }
+      } else if (listToEdit.createdAt) {
+        this.inputListDate.value = this.store.getLocalDateString(new Date(listToEdit.createdAt));
+      } else {
+        this.inputListDate.value = this.store.getLocalDateString();
+      }
+    } else {
+      this.editingListId = null;
+      this.modalTitle.textContent = 'Nova Lista de Compras';
+      this.inputStoreName.value = '';
+      this.inputListDate.value = this.store.getLocalDateString();
+    }
+
     this.modal.classList.remove('hidden');
     this.inputStoreName.focus();
   }
 
   /**
-   * Closes the new list modal popup.
+   * Closes the list modal popup and resets editing state.
    */
   closeModal() {
     if (!this.modal) return;
     this.modal.classList.add('hidden');
+    this.editingListId = null;
+  }
+
+  /**
+   * Formats date string to DD/MM/YYYY using local time without hours and minutes.
+   * @param {string} dateString
+   * @returns {string}
+   */
+  formatDateOnly(dateString) {
+    if (!dateString) return '';
+    if (dateString.includes('T')) {
+      const d = new Date(dateString);
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const year = d.getFullYear();
+      return `${day}/${month}/${year}`;
+    }
+    const [year, month, day] = dateString.split('-');
+    if (year && month && day) {
+      return `${day.padStart(2, '0')}/${month.padStart(2, '0')}/${year}`;
+    }
+    return dateString;
   }
 
   /**
@@ -301,25 +390,39 @@ class ShopListApp {
       const card = document.createElement('div');
       card.className = 'shop-list-card';
 
-      const formattedDate = new Date(list.createdAt).toLocaleDateString('pt-BR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
+      const formattedDate = this.formatDateOnly(list.date || list.createdAt);
 
       card.innerHTML = `
         <div class="shop-list-info">
           <span class="shop-list-title">${this.escapeHtml(list.name)}</span>
-          <span class="shop-list-date">Criada em: ${formattedDate}</span>
+          <span class="shop-list-date">Data: ${formattedDate}</span>
         </div>
-        <button class="btn-delete-list" title="Excluir lista">Excluir</button>
+        <div class="card-actions">
+          <button class="btn-icon btn-edit-list" title="Editar lista" aria-label="Editar lista">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+          </button>
+          <button class="btn-icon btn-delete-list" title="Excluir lista" aria-label="Excluir lista">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+          </button>
+        </div>
       `;
 
       // Card click opens items page
       card.addEventListener('click', () => {
         this.renderDetailView(list.id);
+      });
+
+      // Edit button click opens edit modal
+      const btnEdit = card.querySelector('.btn-edit-list');
+      btnEdit.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.openModal(list);
       });
 
       // Delete button click deletes list
@@ -354,21 +457,23 @@ class ShopListApp {
       this.btnOpenModal.classList.add('hidden');
     }
 
-    const formattedDate = new Date(list.createdAt).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    const formattedDate = this.formatDateOnly(list.date || list.createdAt);
 
     const detailElement = document.createElement('div');
     detailElement.className = 'detail-container';
     detailElement.innerHTML = `
       <button class="btn-back" id="btn-back-main">← Voltar para as listas</button>
       <div class="detail-header">
-        <h2 class="detail-title">${this.escapeHtml(list.name)}</h2>
-        <div class="detail-subtitle">Criada em: ${formattedDate}</div>
+        <div class="detail-header-top">
+          <h2 class="detail-title">${this.escapeHtml(list.name)}</h2>
+          <button class="btn-icon btn-edit-list" id="btn-edit-detail" title="Editar lista" aria-label="Editar lista">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+          </button>
+        </div>
+        <div class="detail-subtitle">Data: ${formattedDate}</div>
       </div>
       <div class="blank-items-container">
         <p>Esta lista está vazia.</p>
@@ -381,6 +486,11 @@ class ShopListApp {
     const btnBack = detailElement.querySelector('#btn-back-main');
     btnBack.addEventListener('click', () => {
       this.renderMainList();
+    });
+
+    const btnEditDetail = detailElement.querySelector('#btn-edit-detail');
+    btnEditDetail.addEventListener('click', () => {
+      this.openModal(list);
     });
   }
 
