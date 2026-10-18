@@ -98,6 +98,9 @@
       AddError(args[0]);
       originalConsoleError(...args);
     }
+    displayErrors.addEventListener('click', function(){
+      displayErrors.style.display = "none";
+    });
   </script>
 
   <script src="src/scripts/app.js" defer onerror="AddLoadError('src/scripts/app.js')"></script>
