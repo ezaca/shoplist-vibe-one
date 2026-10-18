@@ -9,6 +9,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/svg+xml" href="icon.svg">
   <link rel="stylesheet" href="src/style/style.css" onerror="AddLoadError('src/style/style.css')">
+  <script src="https://js.puter.com/v2/"></script>
 </head>
 <body>
   <div class="app-container">
@@ -16,6 +17,23 @@
     <header class="app-header">
       <h1 class="app-title">Shop Vibes</h1>
       <div class="header-actions">
+        <div id="puter-auth-container" class="puter-auth-container">
+          <div class="dropdown">
+            <button id="btn-puter-menu" class="btn-puter-auth dropdown-toggle" type="button" aria-expanded="false" aria-haspopup="true">
+              <span id="puter-btn-label">Puter</span>
+              <span class="dropdown-caret">▾</span>
+            </button>
+            <div id="puter-dropdown-menu" class="dropdown-menu hidden">
+              <div id="puter-user-info" class="dropdown-header hidden">
+                <span id="puter-username" class="dropdown-username"></span>
+              </div>
+              <button id="btn-puter-login" class="dropdown-item" type="button">Entrar no Puter</button>
+              <button id="btn-puter-backup" class="dropdown-item" type="button">Backup online</button>
+              <button id="btn-puter-restore" class="dropdown-item" type="button">Restore backup</button>
+              <button id="btn-puter-logout" class="dropdown-item hidden" type="button">Sair da conta</button>
+            </div>
+          </div>
+        </div>
         <div id="network-status" class="status-badge online">
           <span class="status-dot"></span> Online
         </div>

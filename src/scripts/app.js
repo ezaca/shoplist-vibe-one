@@ -723,33 +723,29 @@ class ShopListApp {
 
     return `
       <div class="shop-item-row ${item.checked ? 'purchased' : ''}" data-id="${item.id}" data-index="${index}" draggable="true">
-        <div class="item-main-row">
-          <div class="item-drag-handle" title="Arrastar para reordenar (mouse ou toque)">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-              <circle cx="5" cy="4" r="1.5"/><circle cx="11" cy="4" r="1.5"/>
-              <circle cx="5" cy="8" r="1.5"/><circle cx="11" cy="8" r="1.5"/>
-              <circle cx="5" cy="12" r="1.5"/><circle cx="11" cy="12" r="1.5"/>
-            </svg>
-          </div>
-          <input type="checkbox" class="item-checkbox" ${item.checked ? 'checked' : ''} title="Marcar como comprado">
-          <input type="text" class="item-emoji-input" value="${this.escapeHtml(item.emoji || '🛒')}" maxlength="4" title="Emoji">
-          <input type="text" class="item-name-input" value="${this.escapeHtml(item.name)}" placeholder="Produto">
-          <button type="button" class="btn-icon btn-delete-item" title="Excluir item" aria-label="Excluir item">
-            <img src="src/img/icons/trash.svg" alt="Excluir" width="16" height="16">
-          </button>
+        <div class="item-drag-handle" title="Arrastar para reordenar (mouse ou toque)">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <circle cx="5" cy="4" r="1.5"/><circle cx="11" cy="4" r="1.5"/>
+            <circle cx="5" cy="8" r="1.5"/><circle cx="11" cy="8" r="1.5"/>
+            <circle cx="5" cy="12" r="1.5"/><circle cx="11" cy="12" r="1.5"/>
+          </svg>
         </div>
-        <div class="item-sub-row">
-          <div class="item-inputs-group">
-            <span class="currency-symbol">R$</span>
-            <input type="number" step="0.01" min="0" class="item-price-input" value="${price > 0 ? price : ''}" placeholder="0,00" title="Preço">
-            <span class="sep-multiply">×</span>
-            <input type="number" step="0.1" min="0" class="item-qty-input" value="${qty}" placeholder="Qtd" title="Quantidade">
-          </div>
-          <div class="item-total-group">
-            <div class="item-current-total">R$ ${this.formatCurrency(itemTotal)}</div>
-            ${prevPriceHtml}
-          </div>
+        <input type="checkbox" class="item-checkbox" ${item.checked ? 'checked' : ''} title="Marcar como comprado">
+        <input type="text" class="item-emoji-input" value="${this.escapeHtml(item.emoji || '🛒')}" maxlength="4" title="Emoji">
+        <input type="text" class="item-name-input" value="${this.escapeHtml(item.name)}" placeholder="Produto">
+        <div class="item-price-group">
+          <span class="currency-symbol">R$</span>
+          <input type="number" step="0.01" min="0" class="item-price-input" value="${price > 0 ? price : ''}" placeholder="0,00" title="Preço">
+          <span class="sep-multiply">×</span>
+          <input type="number" step="0.1" min="0" class="item-qty-input" value="${qty}" placeholder="Qtd" title="Quantidade">
         </div>
+        <div class="item-total-group">
+          <div class="item-current-total">R$ ${this.formatCurrency(itemTotal)}</div>
+          ${prevPriceHtml}
+        </div>
+        <button type="button" class="btn-icon btn-delete-item" title="Excluir item" aria-label="Excluir item">
+          <img src="src/img/icons/trash.svg" alt="Excluir" width="16" height="16">
+        </button>
       </div>
     `;
   }
@@ -1027,9 +1023,393 @@ class ShopListApp {
   }
 }
 
+/**
+ * Manages Puter.com authentication, online backup, and restore with merge.
+ */
+class PuterAuthManager {
+  /**
+   * @param {ShopListStore} store
+   * @param {ShopListApp} app
+   */
+  constructor(store, app) {
+    this.store = store;
+    this.app = app;
+    this.STORAGE_PUTER_KEY = 'shop_vibes_backup_data';
+
+    this.menuBtn = document.getElementById('btn-puter-menu');
+    this.dropdownMenu = document.getElementById('puter-dropdown-menu');
+    this.btnLabel = document.getElementById('puter-btn-label');
+    this.userInfo = document.getElementById('puter-user-info');
+    this.usernameSpan = document.getElementById('puter-username');
+
+    this.loginBtn = document.getElementById('btn-puter-login');
+    this.backupBtn = document.getElementById('btn-puter-backup');
+    this.restoreBtn = document.getElementById('btn-puter-restore');
+    this.logoutBtn = document.getElementById('btn-puter-logout');
+
+    this.init();
+  }
+
+  /**
+   * Initializes listeners and checks current authentication status.
+   */
+  init() {
+    if (this.menuBtn) {
+      this.menuBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.toggleDropdown();
+      });
+    }
+
+    // Close dropdown on outside click
+    document.addEventListener('click', (e) => {
+      if (this.dropdownMenu && !this.dropdownMenu.classList.contains('hidden')) {
+        if (!e.target.closest('#puter-auth-container')) {
+          this.closeDropdown();
+        }
+      }
+    });
+
+    if (this.loginBtn) {
+      this.loginBtn.addEventListener('click', () => {
+        this.closeDropdown();
+        this.login();
+      });
+    }
+
+    if (this.backupBtn) {
+      this.backupBtn.addEventListener('click', () => {
+        this.closeDropdown();
+        this.backupOnline();
+      });
+    }
+
+    if (this.restoreBtn) {
+      this.restoreBtn.addEventListener('click', () => {
+        this.closeDropdown();
+        this.restoreBackup();
+      });
+    }
+
+    if (this.logoutBtn) {
+      this.logoutBtn.addEventListener('click', () => {
+        this.closeDropdown();
+        this.logout();
+      });
+    }
+
+    this.updateAuthState();
+  }
+
+  /**
+   * Opens or closes dropdown menu.
+   */
+  toggleDropdown() {
+    if (!this.dropdownMenu) return;
+    const isHidden = this.dropdownMenu.classList.contains('hidden');
+    if (isHidden) {
+      this.dropdownMenu.classList.remove('hidden');
+      if (this.menuBtn) this.menuBtn.setAttribute('aria-expanded', 'true');
+    } else {
+      this.closeDropdown();
+    }
+  }
+
+  /**
+   * Closes dropdown menu.
+   */
+  closeDropdown() {
+    if (!this.dropdownMenu) return;
+    this.dropdownMenu.classList.add('hidden');
+    if (this.menuBtn) this.menuBtn.setAttribute('aria-expanded', 'false');
+  }
+
+  /**
+   * Checks if user is authenticated with Puter and prompts sign-in if needed.
+   * @returns {Promise<boolean>}
+   */
+  async ensureAuthenticated() {
+    if (typeof puter === 'undefined' || !puter.auth) {
+      alert('Serviço Puter.com não está disponível no momento.');
+      return false;
+    }
+
+    try {
+      if (!puter.auth.isSignedIn()) {
+        const confirmLogin = confirm('Você precisa estar conectado à sua conta do Puter. Deseja fazer login agora?');
+        if (!confirmLogin) return false;
+        await puter.auth.signIn();
+        await this.updateAuthState();
+      }
+      return puter.auth.isSignedIn();
+    } catch (err) {
+      console.error('Falha ao autenticar no Puter:', err);
+      alert('Não foi possível conectar ao Puter.');
+      return false;
+    }
+  }
+
+  /**
+   * Verifies if Puter SDK is available and updates user authentication UI.
+   */
+  async updateAuthState() {
+    if (typeof puter === 'undefined' || !puter.auth) {
+      return;
+    }
+
+    try {
+      if (puter.auth.isSignedIn()) {
+        const user = await puter.auth.getUser();
+        const displayName = (user && (user.username || user.email)) || 'Usuário';
+
+        if (this.usernameSpan) {
+          this.usernameSpan.textContent = displayName;
+        }
+        if (this.userInfo) {
+          this.userInfo.classList.remove('hidden');
+        }
+        if (this.btnLabel) {
+          this.btnLabel.textContent = displayName;
+        }
+        if (this.loginBtn) {
+          this.loginBtn.classList.add('hidden');
+        }
+        if (this.logoutBtn) {
+          this.logoutBtn.classList.remove('hidden');
+        }
+      } else {
+        if (this.usernameSpan) {
+          this.usernameSpan.textContent = '';
+        }
+        if (this.userInfo) {
+          this.userInfo.classList.add('hidden');
+        }
+        if (this.btnLabel) {
+          this.btnLabel.textContent = 'Puter';
+        }
+        if (this.loginBtn) {
+          this.loginBtn.classList.remove('hidden');
+        }
+        if (this.logoutBtn) {
+          this.logoutBtn.classList.add('hidden');
+        }
+      }
+    } catch (err) {
+      console.warn('Puter authentication status check error:', err);
+    }
+  }
+
+  /**
+   * Triggers Puter.com sign in modal flow.
+   */
+  async login() {
+    if (typeof puter === 'undefined' || !puter.auth) {
+      alert('Serviço Puter.com não está carregado ou indisponível.');
+      return;
+    }
+
+    try {
+      if (this.menuBtn) {
+        this.menuBtn.disabled = true;
+      }
+      await puter.auth.signIn();
+      await this.updateAuthState();
+    } catch (err) {
+      console.error('Falha ao autenticar no Puter:', err);
+    } finally {
+      if (this.menuBtn) {
+        this.menuBtn.disabled = false;
+      }
+    }
+  }
+
+  /**
+   * Triggers Puter.com sign out flow and updates UI.
+   */
+  async logout() {
+    if (typeof puter === 'undefined' || !puter.auth) {
+      return;
+    }
+
+    try {
+      if (this.menuBtn) {
+        this.menuBtn.disabled = true;
+      }
+      await puter.auth.signOut();
+      await this.updateAuthState();
+    } catch (err) {
+      console.error('Falha ao desconectar do Puter:', err);
+    } finally {
+      if (this.menuBtn) {
+        this.menuBtn.disabled = false;
+      }
+    }
+  }
+
+  /**
+   * Exports all local shop lists to Puter KV store.
+   */
+  async backupOnline() {
+    const isAuthed = await this.ensureAuthenticated();
+    if (!isAuthed) return;
+
+    try {
+      if (this.backupBtn) this.backupBtn.disabled = true;
+      const lists = this.store.getAll();
+      const payload = {
+        updatedAt: new Date().toISOString(),
+        lists: lists
+      };
+
+      await puter.kv.set(this.STORAGE_PUTER_KEY, JSON.stringify(payload));
+      alert(`Backup realizado com sucesso no Puter! (${lists.length} ${lists.length === 1 ? 'lista exportada' : 'listas exportadas'})`);
+    } catch (err) {
+      console.error('Erro ao fazer backup no Puter:', err);
+      alert('Erro ao realizar o backup no Puter: ' + (err.message || err));
+    } finally {
+      if (this.backupBtn) this.backupBtn.disabled = false;
+    }
+  }
+
+  /**
+   * Fetches data from Puter and merges with local data based on unique IDs.
+   */
+  async restoreBackup() {
+    const isAuthed = await this.ensureAuthenticated();
+    if (!isAuthed) return;
+
+    try {
+      if (this.restoreBtn) this.restoreBtn.disabled = true;
+
+      const remoteRaw = await puter.kv.get(this.STORAGE_PUTER_KEY);
+      if (!remoteRaw) {
+        alert('Nenhum backup encontrado na sua conta do Puter.');
+        return;
+      }
+
+      let parsed = null;
+      try {
+        parsed = typeof remoteRaw === 'string' ? JSON.parse(remoteRaw) : remoteRaw;
+      } catch (parseErr) {
+        console.error('Erro ao parsear dados do backup:', parseErr);
+        alert('Formato de backup inválido no Puter.');
+        return;
+      }
+
+      const remoteLists = Array.isArray(parsed) ? parsed : (parsed && Array.isArray(parsed.lists) ? parsed.lists : null);
+      if (!remoteLists || remoteLists.length === 0) {
+        alert('O backup no Puter está vazio ou não contém listas.');
+        return;
+      }
+
+      const localLists = this.store.getAll();
+      const mergedLists = this.mergeListsById(localLists, remoteLists);
+
+      this.store.saveAll(mergedLists);
+
+      // Refresh current view
+      if (this.app.activeListId) {
+        if (this.store.getListById(this.app.activeListId)) {
+          this.app.renderDetailView(this.app.activeListId);
+        } else {
+          this.app.renderMainList();
+        }
+      } else {
+        this.app.renderMainList();
+      }
+
+      alert(`Restauração concluída! Total de ${mergedLists.length} ${mergedLists.length === 1 ? 'lista atualizada/mesclada' : 'listas atualizadas/mescladas'}.`);
+    } catch (err) {
+      console.error('Erro ao restaurar backup do Puter:', err);
+      alert('Erro ao restaurar backup do Puter: ' + (err.message || err));
+    } finally {
+      if (this.restoreBtn) this.restoreBtn.disabled = false;
+    }
+  }
+
+  /**
+   * Merges remote lists with local lists based on list ID and item ID.
+   * If list/item exists locally, merges fields (remote updates local).
+   * If remote list/item does not exist locally, adds it.
+   * Preserves local lists/items that are not in remote backup.
+   * @param {Array} localLists
+   * @param {Array} remoteLists
+   * @returns {Array} Merged lists
+   */
+  mergeListsById(localLists, remoteLists) {
+    const listMap = new Map();
+
+    // Index all local lists first
+    for (const list of localLists) {
+      if (list && list.id) {
+        listMap.set(String(list.id), JSON.parse(JSON.stringify(list)));
+      }
+    }
+
+    // Merge or insert remote lists
+    for (const remoteList of remoteLists) {
+      if (!remoteList || !remoteList.id) continue;
+      const listId = String(remoteList.id);
+
+      if (listMap.has(listId)) {
+        // Merge list fields
+        const localList = listMap.get(listId);
+        const mergedList = {
+          ...localList,
+          ...remoteList,
+          name: remoteList.name || localList.name,
+          date: remoteList.date || localList.date,
+          createdAt: localList.createdAt || remoteList.createdAt || new Date().toISOString(),
+          items: this.mergeItemsById(localList.items || [], remoteList.items || [])
+        };
+        listMap.set(listId, mergedList);
+      } else {
+        // Add new remote list
+        listMap.set(listId, JSON.parse(JSON.stringify(remoteList)));
+      }
+    }
+
+    return Array.from(listMap.values());
+  }
+
+  /**
+   * Merges list items based on item ID.
+   * @param {Array} localItems
+   * @param {Array} remoteItems
+   * @returns {Array} Merged items
+   */
+  mergeItemsById(localItems, remoteItems) {
+    const itemMap = new Map();
+
+    for (const item of localItems) {
+      if (item && item.id) {
+        itemMap.set(String(item.id), { ...item });
+      }
+    }
+
+    for (const remoteItem of remoteItems) {
+      if (!remoteItem || !remoteItem.id) continue;
+      const itemId = String(remoteItem.id);
+
+      if (itemMap.has(itemId)) {
+        const localItem = itemMap.get(itemId);
+        itemMap.set(itemId, {
+          ...localItem,
+          ...remoteItem
+        });
+      } else {
+        itemMap.set(itemId, { ...remoteItem });
+      }
+    }
+
+    return Array.from(itemMap.values());
+  }
+}
+
 // Instantiate core modules
 const swManager = new ServiceWorkerManager();
 const networkMonitor = new NetworkMonitor(swManager);
 const shopListStore = new ShopListStore();
 const shopListApp = new ShopListApp(shopListStore);
+const puterAuthManager = new PuterAuthManager(shopListStore, shopListApp);
 
